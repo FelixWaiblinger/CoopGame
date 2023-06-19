@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,7 +12,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Player")]
     [SerializeField] private PlayerInput _inputs;
+    [SerializeField] private TMP_Text _identifier;
     private PlayerCharacter _character;
+    private Animator _anim;
 
     // movement
     [SerializeField] private Rigidbody _body;
@@ -23,6 +26,7 @@ public class PlayerController : MonoBehaviour
     private float _rollSpeed = 30;
     private float _rollTimer = 0;
     private bool _rolling = false;
+    private float _rollCD;
 
     // looking
     [SerializeField] private Targeting _targeting;
@@ -47,22 +51,35 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         Instantiate(_character.CharacterModel, transform);
+        _anim = gameObject.GetComponentInChildren<Animator>();
+        _identifier.text = $"P{_inputs.playerIndex + 1}";
 
-        _moveSpeed = _character.MoveSpeed;
-        _currentSpeed = _moveSpeed;
+    	SetStats();
 
-        // initialize status
+        SetWeapons();
+
+        SetSkills();
+    }
+
+    void SetStats()
+    {
         _maxHealth = _character.MaxHealth;
-        _currentHealth = _maxHealth;
+        _moveSpeed = _character.MoveSpeed;
+        _rollCD = _character.RollCD;
 
-        // initialize weapons
+        _currentHealth = _maxHealth;
+        _currentSpeed = _moveSpeed;
+    }
+
+    void SetWeapons()
+    {
         var weapons = gameObject.GetComponentsInChildren<Weapon>();
         _mainWeapon = weapons[0];
-        //_offWeapon = weapons[1];
         _mainWeapon.SetMultiplier(_character.Multiplier);
-        //_offWeapon.SetMultiplier(_character.Multiplier);
+    }
 
-        // initialize skills
+    void SetSkills()
+    {
         var skills = gameObject.GetComponentsInChildren<Skill>();
         _primary = skills[0];
         _secondary = skills[1];
@@ -76,6 +93,8 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
+    #region UPDATES
+
     void Update()
     {
         Move();
@@ -83,9 +102,9 @@ public class PlayerController : MonoBehaviour
         Rotate();
 
         RollTiming();
-    }
 
-    #region UPDATES
+        SetAnimator();
+    }
 
     void Move()
     {
@@ -119,6 +138,33 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void SetAnimator()
+    {
+        if (_moveDirection == Vector3.zero)
+        {
+            _anim.SetBool("Idle", true);
+            _anim.SetBool("Dash", false);
+            _anim.SetBool("Move", false);
+        }
+        else
+        {
+            if (_rolling)
+            {
+                _anim.SetBool("Dash", true);
+                _anim.SetBool("Move", false);
+            }
+            else
+            {
+                _anim.SetBool("Move", true);
+                _anim.SetBool("Dash", false);
+            }
+            _anim.SetBool("Idle", false);
+            _anim.SetFloat("X", _moveDirection.x);
+            _anim.SetFloat("Y", _moveDirection.z);
+        }
+
+    }
+
     #endregion
 
     #region INPUT
@@ -147,6 +193,7 @@ public class PlayerController : MonoBehaviour
         if (ctx.phase != InputActionPhase.Performed) return;
         
         _mainWeapon?.Shoot(transform.rotation);
+        _anim.SetBool("Fire", true);
     }
 
     public void OnOffhand(InputAction.CallbackContext ctx)
@@ -154,6 +201,7 @@ public class PlayerController : MonoBehaviour
         if (ctx.phase != InputActionPhase.Performed) return;
 
         _offWeapon?.Shoot(transform.rotation);
+        _anim.SetBool("Fire", true);
     }
 
     public void OnPrimary(InputAction.CallbackContext ctx)
@@ -215,9 +263,11 @@ public class PlayerController : MonoBehaviour
     {
         _currentHealth -= amount;
         _status.UpdateHealth(_currentHealth, _maxHealth);
+        _anim.SetTrigger("Hit");
 
         if (_currentHealth <= 0)
         {
+            _anim.SetBool("Lose", true);
             _deathEventChannel.RaiseVoidEvent();
         }
     }
