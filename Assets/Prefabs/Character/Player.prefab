@@ -337,7 +337,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2132817182000819107}
   - component: {fileID: 5755451571750891497}
-  - component: {fileID: 9048428347755729499}
   - component: {fileID: 2132817182000819106}
   - component: {fileID: 5298749827068903302}
   m_Layer: 6
@@ -375,26 +374,12 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
+  m_AngularDrag: 100
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 84
   m_CollisionDetection: 0
---- !u!64 &9048428347755729499
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132817182000819105}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
 --- !u!114 &2132817182000819106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -619,6 +604,7 @@ MonoBehaviour:
   _menuEventChannel: {fileID: 11400000, guid: 577a8ded3bb91094397925773ce93bac, type: 2}
   _deathEventChannel: {fileID: 11400000, guid: 194ec96e73c77394eb8036fa499a5713, type: 2}
   _inputs: {fileID: 2132817182000819106}
+  _identifier: {fileID: 8474118910177673397}
   _body: {fileID: 5755451571750891497}
   _targeting: {fileID: 2989812874317078147}
   _status: {fileID: 8663603393582521431}
